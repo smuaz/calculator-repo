@@ -20,10 +20,7 @@ loop do
     puts "Play again? (Y/N)"
     play = gets.chomp.downcase
 
-    if play != 'y'
-      puts "Good bye!"
-      break
-    end
+    break if play != 'y'
 
   end
 
