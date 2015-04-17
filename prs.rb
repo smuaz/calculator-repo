@@ -1,6 +1,6 @@
 puts "Play Paper Rock Scissors!"
 
-options = { 'p'=> 'paper', 'r'=> 'rock', 's'=> 'scissors'}
+options = { 'p'=> 'paper', 'r'=> 'rock', 's'=> 'scissors' }
 
 loop do
   puts "Choose one: (P/R/S)"
@@ -11,7 +11,9 @@ loop do
     puts "Your picked #{options[player_choice].capitalize} and computer picked #{options[computer_choice].capitalize}"
     if player_choice == computer_choice
       puts "It's a tie."
-    elsif (player_choice == 'p' && computer_choice == 'r') || (player_choice == 'r' && computer_choice == 's') || (player_choice == 's' && computer_choice == 'p')
+    elsif (player_choice == 'p' && computer_choice == 'r') ||
+          (player_choice == 'r' && computer_choice == 's') ||
+          (player_choice == 's' && computer_choice == 'p')
       puts "You won!"
     else
       puts "Computer won!"
@@ -20,7 +22,7 @@ loop do
     puts "Play again? (Y/N)"
     play = gets.chomp.downcase
 
-    break if play != 'y'
+    break unless play == 'y'
 
   end
 
