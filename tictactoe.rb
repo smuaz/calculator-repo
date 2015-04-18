@@ -11,6 +11,10 @@
 
 require 'pry'
 
+WINNING_POSITIONS = [[1,2,3],[4,5,6],[7,8,9],
+                     [1,4,7],[2,5,8],[3,6,9],
+                     [1,5,9],[3,5,7]]
+
 def draw_board(board)
   system 'clear'
   puts "     |     |     "
@@ -35,69 +39,70 @@ def player_picks(board)
   board[player_position] = 'X'
 end
 
-def block_player(board)
-  winning_positions = [[1,2,3],[4,5,6],[7,8,9],
-                       [1,4,7],[2,5,8],[3,6,9],
-                       [1,5,9],[3,5,7]]
-  
-  winning_positions.each do |line|
-    if board[line[0]] == 'O' && board[line[1]] == 'O' && board[line[2]] == ' '
-      return line[2]
-    elsif board[line[0]] == ' ' && board[line[1]] == 'O' && board[line[2]] == 'O'
-      return line[0]
-    elsif board[line[0]] == 'O' && board[line[1]] == ' ' && board[line[2]] == 'O'
-      return line[1]
-    elsif board[line[0]] == 'X' && board[line[1]] == 'X' && board[line[2]] == ' '
-      return line[2]
-    elsif board[line[0]] == ' ' && board[line[1]] == 'X' && board[line[2]] == 'X'
-      return line[0]
-    elsif board[line[0]] == 'X' && board[line[1]] == ' ' && board[line[2]] == 'X'
-      return line[1]
-    end
-
+def two_in_a_row(hash, pick)
+  if hash.values.count(pick) == 2
+    hash.select { |k, v| v == ' '}.keys.first
+  else
+    false
   end
-
-  return nil
 end
 
 def computer_picks(board)
-  defend = block_player(board)
+  puts "Computer chooses a square"
+  sleep 0.5
 
-  if defend == nil
-    computer_position = empty_square(board).sample
-    board[computer_position] = 'O'
-  else
-    board[defend] = 'O'
+  defend_square = nil
+  attacked = false
+
+  # Computer priority
+  # 1. attack if there's a chance of winning
+  # 2. if not attack, defend the square
+  # 3. else , randomly choose square
+
+  WINNING_POSITIONS.each do |line|
+    defend_square = two_in_a_row({ line[0] => board[line[0]],
+                                   line[1] => board[line[1]],
+                                   line[2] => board[line[2]]}, 'O')
+
+    if defend_square
+      board[defend_square] = 'O'
+      attacked = true
+      break
+    end
   end
 
+  if attacked == false
+    WINNING_POSITIONS.each do |line|
+      defend_square = two_in_a_row({ line[0] => board[line[0]],
+                                     line[1] => board[line[1]],
+                                     line[2] => board[line[2]]}, 'X')
+
+      if defend_square
+        board[defend_square] = 'O'
+        break
+      end
+    end
+  end
+
+  board[empty_square(board).sample] = 'O' unless defend_square
 end
 
 def empty_square(board)
   board.select { |k, v| v == ' ' }.keys
 end
 
-def is_it_winning?(board)
+def is_it_winning(board)
   winner = check_winner(board)
   draw_board(board)
   winner
 end
 
 def check_winner(board)
-  winning_positions = [[1,2,3],[4,5,6],[7,8,9],
-                       [1,4,7],[2,5,8],[3,6,9],
-                       [1,5,9],[3,5,7]]
-
-  winning_positions.each do |line|
-    if board[line[0]] == 'X' && board[line[1]] == 'X' && board[line[2]] == 'X'
-      return 'Player'
-    elsif board[line[0]] == 'O' && board[line[1]] == 'O' && board[line[2]] == 'O'
-      return 'Computer'
-    end
-
+  WINNING_POSITIONS.each do |line|
+    return 'Player' if board.values_at(*line).count('X') == 3
+    return 'Computer' if board.values_at(*line).count('O') == 3
   end
-
-  return nil
-
+  nil
 end
 
 board = { 1 => ' ', 2 => ' ', 3 => ' ',
@@ -108,14 +113,14 @@ draw_board(board)
 
 begin
   player_picks(board)
-  winner = is_it_winning?(board)
-  break if winner != nil
+  winner = is_it_winning(board)
+  break if winner
 
   computer_picks(board)
-  winner = is_it_winning?(board)
-  break if winner != nil
+  winner = is_it_winning(board)
+  break if winner
 
-end until winner || empty_square(board).empty?
+end until empty_square(board).empty?
 
 if winner
   puts "#{winner} won!"
