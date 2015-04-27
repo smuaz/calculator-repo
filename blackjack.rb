@@ -113,11 +113,11 @@ end
 def check_if_player_win(cards)
   cards.flatten!
   if cards.include? (21)
-    return 'Blackjack'
+   'Blackjack'
   elsif cards.find_all { |i| i < 21 }.any?
-    return 'Play'
+   'Play'
   else
-    return 'Busted'
+   'Busted'
   end
 end
 
