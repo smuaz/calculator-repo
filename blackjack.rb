@@ -24,6 +24,10 @@ def welcome_message
   begin
     puts "Are you ready? (y/n)"
     is_ready = gets.chomp.downcase
+    if is_ready == 'n'
+      puts "Good bye! See you again"
+      exit
+    end
   end until is_ready == 'y'
 end
 
@@ -78,36 +82,32 @@ def check_if_any_blackjacks(player_initial_sum, dealer_initial_sum)
   end
 end
 
-def calculate_sum(arr, sum)
-  new_arr = arr[0].product(arr[1])
-  new_arr.each do |card|
+def calculate_sum(cards_numbers, sum)
+  new_cards_numbers = cards_numbers[0].product(cards_numbers[1])
+  new_cards_numbers.each do |card|
     sum << card.inject(:+)
   end
-  return sum.uniq
 end
 
-def total_possible_sum(arr)
+def total_possible_sum(cards_numbers)
   sum = []
   i = 0
-  cycle = arr.count - 1
-  while i < cycle
-    calculate_sum(arr, sum)
-    arr.shift
-    arr.shift
-    new_arr = sum.clone
-    arr.unshift(new_arr)
+  cards_count = cards_numbers.count - 1
+  while i < cards_count
+    calculate_sum(cards_numbers, sum)
+    cards_numbers.shift(2)
+    new_cards_numbers = sum.clone
+    cards_numbers.unshift(new_cards_numbers)
     sum.clear
     i += 1
   end
-
-  #p arr
-  return arr
+  cards_numbers
 end
 
 def get_cards_number(cards, decks)
-  arr = []
-  cards.each { |k| arr << decks[k] }
-  return total_possible_sum(arr)
+  cards_numbers = []
+  cards.each { |k| cards_numbers << decks[k] }
+  total_possible_sum(cards_numbers)
 end
 
 def check_if_player_win(cards)
@@ -123,18 +123,18 @@ end
 
 def check_if_dealer_win(cards)
   cards.flatten!
-  if cards.include? (21)
-    return 'Blackjack'
+  if cards.include?(21)
+    'Blackjack'
   elsif cards.find_all { |i| i < 21 }.any?
 
     if cards.find_all { |i| i < 21 }.max > 16
-      return 'Stay'
+      'Stay'
     else
-      return 'Hit'
+      'Hit'
     end
 
   else
-    return 'Busted'
+    'Busted'
   end
 end
 
@@ -158,7 +158,7 @@ def check_if_player_winning(player_cards, cards, decks)
     end
 
   elsif player_choice == 's'
-    return 'Stay'
+    'Stay'
   else
     puts "Please choose either h or s"
     check_if_player_winning(player_cards, cards, decks)
@@ -182,7 +182,7 @@ def check_if_dealer_winning(dealer_cards, cards, decks)
   elsif status == 'Stay'
     puts "Dealer choose to stay.."
     sleep 0.5
-    return 'Stay'
+    'Stay'
   elsif status == 'Busted'
     puts "Dealer have busted! You have won!"
     play_again
@@ -190,25 +190,18 @@ def check_if_dealer_winning(dealer_cards, cards, decks)
 end
 
 def play_blackjack
-  diamond_cards = { "Diamond Ace" => [1, 11], "Diamond 2" => [2], "Diamond 3" => [3], "Diamond 4" => [4],
-                    "Diamond 5" => [5], "Diamond 6" => [6], "Diamond 7" => [7], "Diamond 8" => [8], "Diamond 9" => [9],
-                    "Diamond 10" => [10], "Diamond Joker" => [10], "Diamond Queen" => [10], "Diamond King" => [10] }
 
-  heart_cards = { "Heart Ace" => [1, 11], "Heart 2" => [2], "Heart 3" => [3], "Heart 4" => [4],
-                    "Heart 5" => [5], "Heart 6" => [6], "Heart 7" => [7], "Heart 8" => [8], "Heart 9" => [9],
-                    "Heart 10" => [10], "Heart Joker" => [10], "Heart Queen" => [10], "Heart King" => [10] }
+  decks = {}
+  card_types = ["Diamond", "Heart", "Spade", "Club"]
 
-  spade_cards = { "Spade Ace" => [1, 11], "Spade 2" => [2], "Spade 3" => [3], "Spade 4" => [4],
-                    "Spade 5" => [5], "Spade 6" => [6], "Spade 7" => [7], "Spade 8" => [8], "Spade 9" => [9],
-                    "Spade 10" => [10], "Spade Joker" => [10], "Spade Queen" => [10], "Spade King" => [10] }
-
-  club_cards = { "Club Ace" => [1, 11], "Club 2" => [2], "Club 3" => [3], "Club 4" => [4],
-                    "Club 5" => [5], "Club 6" => [6], "Club 7" => [7], "Club 8" => [8], "Club 9" => [9],
-                    "Club 10" => [10], "Club Joker" => [10], "Club Queen" => [10], "Club King" => [10] }
+  card_types.each do |card_name|
+    decks.merge!({ "#{card_name} Ace" => [1, 11], "#{card_name} 2" => [2], "#{card_name} 3" => [3], "#{card_name} 4" => [4],
+                      "#{card_name} 5" => [5], "#{card_name} 6" => [6], "#{card_name} 7" => [7], "#{card_name} 8" => [8], "#{card_name} 9" => [9],
+                      "#{card_name} 10" => [10], "#{card_name} Joker" => [10], "#{card_name} Queen" => [10], "#{card_name} King" => [10] })
+  end
 
   puts "Decks are being shuffled ..."
   sleep 0.5
-  decks = diamond_cards.merge(heart_cards).merge(spade_cards).merge(club_cards)
   cards = decks.keys.shuffle!
 
   player_cards = [cards.shift, cards.shift]
